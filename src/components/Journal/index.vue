@@ -5,9 +5,9 @@
       <!-- form表单 //form表单里面包含2个select/2个form-item/1个date-picker/-->
       <el-form :inline="true" :model="formData" class="demo-form-inline">
         <!-- 租户名称 -->
-        <span class="demonstration">租户名称</span> 
+        <span class="demonstration">租户名称</span>
         <!-- 下拉框组件一挂载就掉 -->
-        <el-select v-model="formData.tenantName"  placeholder="租户名称" class="right">
+        <el-select v-model="formData.tenantName" placeholder="租户名称" class="right">
           <el-option
             v-for="item in tenantNameOptions"
             :key="item.tenantID"
@@ -48,9 +48,7 @@
       <i class="el-icon-pie-chart" id="bd"></i> 列表明细
     </div>
     <!-- table布局 -->
-    <el-table
-      :data="tableData"
-    >
+    <el-table :data="tableData">
       <el-table-column prop="logID" label="日志ID" width="180"></el-table-column>
       <el-table-column prop="tenantName" label="租户名" width="180"></el-table-column>
       <el-table-column prop="level" label="日志等级"></el-table-column>
@@ -67,6 +65,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页/分页 -->
     <el-pagination
       style="text-align:center;"
       @current-change="handleCurrentChange"
@@ -111,7 +110,7 @@ import echarts from "echarts";
 export default {
   data() {
     return {
-      app:null,
+      app: null,
       pickerOptions: {
         shortcuts: [
           {
@@ -143,16 +142,16 @@ export default {
       //formData是下拉框的数据
       formData: {
         tenantName: "",
-        level:'',
-        IP:'',
+        level: "",
+        IP: "",
         selectTime: []
       }, // 搜索表单
       pagination: {
         start: 1, //从第一页开始
         pageSize: 6, //每一页展示6条数据
-        total: 0 
+        total: 0
       }, // 分页配置
-      detailForm:{},
+      detailForm: {},
       addForm: {
         name: "",
         sort: 99
@@ -166,10 +165,8 @@ export default {
       dialogAddgsVisible: false,
       dialogEditgsVisible: false,
       dialogEditgsVisible1: false,
-      dialogDetailsVisible:false,
-      journalLevel: [
-        {level:'INFO'},{level:'WARN'}
-      ], // 日志等级死数据
+      dialogDetailsVisible: false,
+      journalLevel: [{ level: "INFO" }, { level: "WARN" }], // 日志等级死数据
       tenantNameOptions: [
         // {tenantID: 1,tenantName: '移动'},
         // {tenantID: 2, tenantName: '联通'},
@@ -197,119 +194,120 @@ export default {
       loading: true,
       barChartOptions: {
         xAxis: [],
-        series: [
-          [],
-          [],
-          []
-        ]
+        series: [[], [], []]
       }
     };
   },
   mounted() {
     this.app = echarts.init(this.$refs.barCharts);
     //this.getJournalOverview();
-    this.queryTenantName({});  //调取获取租户名称接口
-    this.queryLogCallOverview({});  //请求日志调用概况接口
-    this.getJournal({start: this.pagination.start,pageSize:this.pagination.pageSize});  // 日志搜索 日志明细接口
+    this.queryTenantName({}); //调取获取租户名称接口
+    this.queryLogCallOverview({}); //请求日志调用概况接口
+    this.getJournal({
+      start: this.pagination.start,
+      pageSize: this.pagination.pageSize
+    }); // 日志搜索 日志明细接口
   },
   methods: {
     // 生成调用概况柱状图
-    generatorBarChart(){
-       // 初始化echarts实例
+    generatorBarChart() {
+      // 初始化echarts实例
       let option = {
         title: {
-          text: '调用概况'
+          text: "调用概况"
         },
-        tooltip : {
-          trigger: 'axis',
-          axisPointer : {            // 坐标轴指示器，坐标轴触发有效
-            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
-          },
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            // 坐标轴指示器，坐标轴触发有效
+            type: "shadow" // 默认为直线，可选为：'line' | 'shadow'
+          }
         },
         grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
+          left: "3%",
+          right: "4%",
+          bottom: "3%",
           containLabel: true
         },
-        xAxis : [
+        xAxis: [
           {
-            type : 'category',
-            data : this.barChartOptions.xAxis,
+            type: "category",
+            data: this.barChartOptions.xAxis,
             axisTick: {
               alignWithLabel: true
             }
           }
         ],
-        yAxis : [
+        yAxis: [
           {
-            type : 'value'
+            type: "value"
           }
         ],
-        series : [
+        series: [
           {
-            name:'0点~8点',
-            type:'bar',
+            name: "0点~8点",
+            type: "bar",
             barWidth: 30,
             data: this.barChartOptions.series[0],
-            color: ['#3398DB'],
+            color: ["#3398DB"]
           },
           {
-            name:'8点~16点',
-            type:'bar',
+            name: "8点~16点",
+            type: "bar",
             barWidth: 30,
-            data:this.barChartOptions.series[1],
-            color: ['#3398DB'],
+            data: this.barChartOptions.series[1],
+            color: ["#3398DB"]
           },
           {
-            name:'16点~24点',
-            type:'bar',
+            name: "16点~24点",
+            type: "bar",
             barWidth: 30,
-            data:this.barChartOptions.series[2],
-            color: ['#3398DB'],
-          },
+            data: this.barChartOptions.series[2],
+            color: ["#3398DB"]
+          }
         ]
       };
       this.app.setOption(option); // 使用配置项显示柱状图
     },
-    dateTransfer(date){
+    dateTransfer(date) {
       var y = date.getFullYear();
       var m = date.getMonth() + 1;
-      m = m < 10 ? ('0' + m) : m;
+      m = m < 10 ? "0" + m : m;
       var d = date.getDate();
-      d = d < 10 ? ('0' + d) : d;
+      d = d < 10 ? "0" + d : d;
       var h = date.getHours();
       var minute = date.getMinutes();
-      minute = minute < 10 ? ('0' + minute) : minute;
-      return y + '-' + m + '-' + d+' '+'00:00:00';
+      minute = minute < 10 ? "0" + minute : minute;
+      return y + "-" + m + "-" + d + " " + "00:00:00";
     },
     //调用搜索接口
     onSubmit() {
-      let {tenantName,level,IP,selectTime} = this.formData;
+      let { tenantName, level, IP, selectTime } = this.formData;
       // if(!(tenantName || level || IP || selectTime.length))return;
       let formData = {};
       tenantName && (formData.tenantName = tenantName);
       level && (formData.level = level);
       IP && (formData.source = IP);
-      selectTime.length && (
-        formData.startTime = this.dateTransfer(selectTime[0]),
-        formData.endTime = this.dateTransfer(selectTime[1])
-      );
+      selectTime.length &&
+        ((formData.startTime = this.dateTransfer(selectTime[0])),
+        (formData.endTime = this.dateTransfer(selectTime[1])));
       this.pagination = {
-        start:1,
+        start: 1,
         pageSize: 6,
         total: 0
       };
-      Object.keys(this.pagination).forEach(item=>formData[item]=this.pagination[item]);
+      Object.keys(this.pagination).forEach(
+        item => (formData[item] = this.pagination[item])
+      );
       // console.log("formdata",formData)
 
       this.getJournal(formData);
-      this.queryLogCallOverview(formData)
+      this.queryLogCallOverview(formData);
     },
-    viewdetail(index,row) {
+    viewdetail(index, row) {
       // console.log(index,'ndex')
-      this.dialogDetailsVisible=true;
-      this.detailForm=row;        
+      this.dialogDetailsVisible = true;
+      this.detailForm = row;
     },
     currentChangePage(list) {
       let from = (this.currentPage - 1) * this.pageSize;
@@ -328,7 +326,11 @@ export default {
     // },
     handleCurrentChange: function(currentPage) {
       // this.pagination.start = currentPage;
-      this.getJournal({start:currentPage,pageSize:this.pagination.pageSize,...this.formData});
+      this.getJournal({
+        start: currentPage,
+        pageSize: this.pagination.pageSize,
+        ...this.formData
+      });
       // console.log(this.pagination.start)  //点击第几页
     },
     deleteRow1(index) {
@@ -352,88 +354,111 @@ export default {
       });
     },
     // 列表明细接口 table表格
-    getJournal(obj){
+    getJournal(obj) {
       this.loading = true;
-      this.$axios.post("/oms-basic/abilityLog!selectLog.json", this.$qs.stringify(obj))
-        .then( res => {
+      this.$axios
+        .post("/oms-basic/abilityLog!selectLog.json", this.$qs.stringify(obj))
+        .then(res => {
           // console.log("表格数据",res.data)
-          if(res.data.code === '10000'){
+          if (res.data.code === "10000") {
             this.pagination.total = res.data.count;
             this.tableData = res.data.data;
             this.loading = false;
             // this.resetForm();
           }
-        }).catch(err=>console.log('queryJouralList_error',err));
-        //this.getJournalOverview();
+        })
+        .catch(err => console.log("queryJouralList_error", err));
+      //this.getJournalOverview();
     },
-    // 调取获取租户名称接口
-    queryTenantName(obj){
-      this.$axios.post('/oms-basic/tenant!selectTenantList.json',this.$qs.stringify(obj))
-      .then(res=>{
-        if(res.data.code === '10000'){
-          // console.log("res",res.data)
-          // this.tenantOptions = [...res.data.data];
-          this.tenantNameOptions = res.data.data;
-        }
-      }).catch(err=>console.log("tenantName_error",err))
+    // 调取获取租户名称接口//-----------------------------------------------------------------------
+    queryTenantName(obj) {
+      this.$axios
+        .post(
+          "/oms-basic/tenant!selectTenantList.json",
+          this.$qs.stringify(obj)
+        )
+        .then(res => {
+          if (res.data.code === "10000") {
+            // console.log("res",res.data)
+            // this.tenantOptions = [...res.data.data];
+            this.tenantNameOptions = res.data.data;
+          }
+        })
+        .catch(err => console.log("tenantName_error", err));
     },
     // 获取日志等级接口  用的时候叫实参  定义的时候叫形参
-    queryJournalLevel(obj){
-      this.$axios.post('',this.$qs.stringify(obj))
-      .then(res=>{
-        if(res.data.code === '100000'){
-          console.log("level",res.data.data)
-        }
-      }).catch(err=>console.log("journalLevel_error",err))
+    queryJournalLevel(obj) {
+      this.$axios
+        .post("", this.$qs.stringify(obj))
+        .then(res => {
+          if (res.data.code === "100000") {
+            console.log("level", res.data.data);
+          }
+        })
+        .catch(err => console.log("journalLevel_error", err));
     },
     // 表单重置函数
     resetForm() {
       this.formData = {
         tenantName: "",
-        level:'',
-        IP:'',
+        level: "",
+        IP: "",
         selectTime: []
       };
     },
     // 导出接口
-    exportCurrent(){
-      window.open('/oms-basic/depository/export/'+_url);
+    exportCurrent() {
+      this.$axios
+        .post("/oms-basic/abilityLog!exportLogMessage.json")
+        .then(res => {
+          console.log(res.data.address, "res123456");
+          window.open(
+            "http://192.168.1.203:28084/oms-basic" + res.data.address
+          );
+        });
     },
     // 请求日志调用概况接口
-    queryLogCallOverview(obj){
-      this.$axios.post('/oms-basic/abilityLog!selectLogOverview.json',this.$qs.stringify(obj))
-      .then(res=>{
-        if(res.data.code === '10000'){
-          //console.log("logCallOverview----",res.data.List);
-          //this.barChartOptions.series=res.data.List;
+    queryLogCallOverview(obj) {
+      this.$axios
+        .post(
+          "/oms-basic/abilityLog!selectLogOverview.json",
+          this.$qs.stringify(obj)
+        )
+        .then(res => {
+          if (res.data.code === "10000") {
+            //console.log("logCallOverview----",res.data.List);
+            //this.barChartOptions.series=res.data.List;
 
-          //还要进行数据排序 对应日期
-          let _filter = (code,count)=>{
-            switch(code){
-              case 0: series[0].push(count);break;
-              case 8: series[1].push(count);break;
-              case 16: series[2].push(count);break;
-            }
-          };
-          let xAxis = [];
-          let  series = [[],[],[]];
-          res.data.List.forEach((item,index)=>{
-            if(index === 0){
-              xAxis.push(item.TimeDay);
-            }else{
-              if(xAxis.indexOf(item.TimeDay) === -1){
-                xAxis.push(item.TimeDay);             
-              }
-            };      // 时间区间     时间区间内日志总数
-            _filter(item.TimeHourStart,item.count);
-          });
-          // console.log("调用概况",xAxis,series)
-          this.barChartOptions = {xAxis,series};
-          this.$nextTick(()=>this.generatorBarChart());
-
-        }
-      }).catch(err=>console.log('logCallOverview_error',err));
-    },
+            //还要进行数据排序 对应日期
+            let _filter = obj => {
+              // switch(code){
+              //   case 0: series[0].push(count);break;
+              //   case 8: series[1].push(count);break;
+              //   case 16: series[2].push(count);break;
+              // }
+              series[0].push(obj.first);
+              series[1].push(obj.second);
+              series[2].push(obj.third);
+            };
+            let xAxis = [];
+            let series = [[], [], []];
+            res.data.List.forEach((item, index) => {
+              if (index === 0) {
+                xAxis.push(item.TimeDay);
+              } else {
+                if (xAxis.indexOf(item.TimeDay) === -1) {
+                  xAxis.push(item.TimeDay);
+                }
+              } // 时间区间     时间区间内日志总数
+              _filter(item);
+            });
+            // console.log("调用概况",xAxis,series)
+            this.barChartOptions = { xAxis, series };
+            this.$nextTick(() => this.generatorBarChart());
+          }
+        })
+        .catch(err => console.log("logCallOverview_error", err));
+    }
   }
 };
 </script>

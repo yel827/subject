@@ -8,7 +8,7 @@
         </el-form-item>
 
         <span class="demonstration">日志等级</span>
-        <el-select v-model="value" placeholder="请选择" class="right">
+        <el-select v-model="value" filterable placeholder="请选择" class="right">
           <el-option
             v-for="item in options"
             :key="item.label"
@@ -312,7 +312,7 @@ export default {
         });
     },
     goDownload(_url){
-      window.location.href="http://192.168.1.203:28082/oms-basic"+_url
+      window.location.href="http://192.168.1.203:28084/oms-basic"+_url
     }
   },
   

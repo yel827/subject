@@ -356,6 +356,7 @@ export default {
         console.log(res, "告警列表");
         this.tableData = res.data.list;
         this.total = res.data.count;
+        this.tableData.warnStatus = '已处理'
       });
     },
     //数据展示(联系人列表)
@@ -809,7 +810,6 @@ export default {
     }
   }
 }
-
 .home {
   height: 870px;
   background: #fff;

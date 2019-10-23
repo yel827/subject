@@ -80,7 +80,6 @@
               <el-select v-model="compStatus" placeholder="请选择" class="right">
                 <el-option
                   v-for="item in optionss"
-
                   :key="item.name"
                   :label="item.name"
                   :value="item.value"
@@ -102,38 +101,85 @@
             <el-table-column prop="normalTotalComponents" label="正常组件数量"></el-table-column>
             <el-table-column prop="alarmTotalComponents" label="告警组件数量"></el-table-column>
             <el-table-column prop="updateTime" label="更新时间"></el-table-column>
-
-            <el-table-column label="操作">
+            <!-- 组件监控操作详情 -->
+            <el-table-column label="操作">  
               <template slot-scope="scope">
-                <el-button type="text" @click="editgsForm(scope.$index, scope.row)">
+                <el-button type="text" @click="getDetail2(scope.$index, scope.row)">
                   <i class="icon iconfont icon-chakan" style="font-size:18px; font-weight:bold;"></i>
                 </el-button>
+                 <el-button type="text">
+                  <i class="el-icon-refresh"  style="font-size:24px; font-weight:bold;"></i>
+                 </el-button>
+              <el-dialog 
+                width='54%'
+                z-index="99"
+              title="组件监控详情" :visible.sync="dialogTableVisible">
+              <span class="demonstration">组件状态</span>
+              <el-select v-model="compStatus" placeholder="请选择" class="right">
+                <el-option
+                  v-for="item in optionss"
+                  :key="item.name"
+                  :label="item.name"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+              <el-button type="primary" class="right">搜索</el-button>
+                <el-table :data="gridData">
+                  <el-table-column property="hostIp" label="组件IP" width="100"></el-table-column>
+                  <el-table-column property="port" label="组件端口" width="100"></el-table-column>
+                  <el-table-column property="status" label="组件状态" width="100"></el-table-column>
+                  <el-table-column property="totolRunTime" label="运行时长" width="100"></el-table-column>
+                  <el-table-column property="normalRunTimeStr" label="正常运行时长" width="105"></el-table-column>
+                  <el-table-column property="errorRunTimeStr" label="异常运行时长" width="105"></el-table-column>
+                  <el-table-column property="componentRatio" label="组件可用比" width="100"></el-table-column>
+                  <el-table-column property="updateTime" label="更新时间" width="100"></el-table-column>
+                  <el-table-column  label="操作" width="100">
+                    <el-button type="text">刷新</el-button>
+                  </el-table-column>
+                </el-table>
+              </el-dialog>
               </template>
             </el-table-column>
           </el-table>
+          <div class="block" id="vlok">
+          <el-pagination
+              @size-change="handleSizeChange2"
+              @current-change="handleCurrentChange2"
+              :current-page.sync="currentPage"
+              :page-size="10"
+              layout="total, prev, pager, next"
+              :total="total">
+        </el-pagination>
+      </div>
         </el-tab-pane>
         <!-- 选项卡三能力监控布局 -->
         <el-tab-pane label="能力监控" name="third">
           <!-- 搜索 form表单 -->
           <div class="search">
-            <el-form :inline="true" :model="formInline" class="demo-form-inline">
-              <el-form-item label="主机名称" class="right">
+            <el-form :inline="true"  class="demo-form-inline">
+              <!-- <el-form-item label="主机名称" class="right">
                 <el-input v-model="formInline.name" placeholder="主机名称"></el-input>
-              </el-form-item>
-              <el-form-item label="主机IP" class="right">
-                <el-input v-model="formInline.name" placeholder="主机IP"></el-input>
-              </el-form-item>
-              <span class="demonstration">日志等级</span>
-              <el-select v-model="values" filterable placeholder="请选择" class="right">
+              </el-form-item> -->
+              <span class="demonstration">选择能力</span>
+              <el-select v-model="formData.name" placeholder="请选择" class="right">
                 <el-option
-                  v-for="item in optionss"
+                  v-for="item in arr"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.name"
+                ></el-option>
+              </el-select>
+            <span class="demonstration">能力状态</span>
+              <el-select v-model="abilityStatus" filterable placeholder="请选择" class="right">
+                <el-option
+                  v-for="item in option2"
                   :key="item.value"
                   :label="item.name"
                   :value="item.value"
                 ></el-option>
               </el-select>
               <el-form-item>
-                <el-button type="primary" @click="onSubmit" class="right">搜索</el-button>
+                <el-button type="primary" @click="onSubmit3" class="right">搜索</el-button>
               </el-form-item>
             </el-form>
           </div>
@@ -151,10 +197,41 @@
             <el-table-column prop="updateTime" label="更新时间"></el-table-column>
 
             <el-table-column label="操作">
+              <!-- 能力监控操作详情 -->
               <template slot-scope="scope">
-                <el-button type="text" @click="editgsForm(scope.$index, scope.row)">
+                <el-button type="text" @click="getDetail3(scope.$index, scope.row)">
                   <i class="icon iconfont icon-chakan" style="font-size:18px; font-weight:bold;"></i>
                 </el-button>
+                 <el-button type="text" @click="getRefresh">
+                  <i class="el-icon-refresh" style="font-size:24px; font-weight:bold;"></i>
+                 </el-button>
+              <el-dialog 
+                width='54%'
+              title="能力监控详情" :visible.sync="dialogTableVisible3">
+              <span class="demonstration">组件状态</span>
+              <el-select v-model="compStatus" placeholder="请选择" class="right">
+                <el-option
+                  v-for="item in optionss"
+                  :key="item.name"
+                  :label="item.name"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+              <el-button type="primary" class="right">搜索</el-button>
+                <el-table :data="gridData3">
+                  <el-table-column property="hostIp" label="能力IP" width="100"></el-table-column>
+                  <el-table-column property="port" label="能力端口" width="100"></el-table-column>
+                  <el-table-column property="status" label="能力状态" width="100"></el-table-column>
+                  <el-table-column property="totolRunTime" label="运行时长" width="100"></el-table-column>
+                  <el-table-column property="normalRunTimeStr" label="正常运行时长" width="105"></el-table-column>
+                  <el-table-column property="errorRunTimeStr" label="异常运行时长" width="105"></el-table-column>
+                  <el-table-column property="componentRatio" label="组件可用比" width="100"></el-table-column>
+                  <el-table-column property="updateTime" label="更新时间" width="100"></el-table-column>
+                  <el-table-column  label="操作" width="100">
+                    <el-button type="text">刷新</el-button>
+                  </el-table-column>
+                </el-table>
+              </el-dialog>
               </template>
             </el-table-column>
           </el-table>
@@ -165,9 +242,9 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page.sync="currentPage"
-          :page-size="100"
+          :page-size="10"
           layout="total, prev, pager, next"
-          :total="1000"
+          :total="total"
         ></el-pagination>
       </div>
       
@@ -204,7 +281,8 @@
                   <li>CPU内核·········{{hostDetail.cpuCore}} 个</li>
                 </ul>
                 <div class="el-progress-circle" style="height: 126px; width: 126px;">
-                  <div style='width:100px;height:100px;border-radius:50%;border:solid 1px #f00;'>{{hostDetail.cpuUtility}}%</div>
+                  <!-- <div style='width:100px;height:100px;border-radius:50%;border:solid 1px #f00;'>{{hostDetail.cpuUtility}}%</div> -->
+                  <canvas ref="canvas1" id="canvas1" width="100" height="100" background="red">{{hostDetail.cpuUtility}}%</canvas>
                   <p style="width:200px;font-size:14px;text-align:center;">CPU使用率</p>
                 </div>
               </div>
@@ -220,8 +298,10 @@
                 <ul class="list">
                   <li>内存容量·········{{hostDetail.ramCapacity}}G</li>
                 </ul>
-                <div class="el-progress-circle" style="height: 126px; width: 126px;">
-                  <div style='width:100px;height:100px;border-radius:50%;border:solid 1px #f00;'>{{hostDetail.ramUtility}}%</div>
+                <div class="el-progress-circle" style="height: 100px; width: 100px; text-align:center;">
+                  <!-- <div style='width:100px;height:100px;border-radius:50%;border:solid 1px #f00;'>{{hostDetail.ramUtility}}%</div> -->
+                  <!-- <el-progress type="circle" :percentage="hostDetail.ramUtility" width="90" ></el-progress> -->
+                  <canvas ref="canvas2" id="canvas2" width="100" height="100">{{hostDetail.ramUtility}}%</canvas>
                   <p style="width:200px;font-size:14px;text-align:center;">内存使用率</p>
                 </div>
               </div>
@@ -241,6 +321,51 @@ import echarts from "echarts";
 export default {
   data() {
     return {
+      canvas1Value: 0,
+      canvas2Value: 0,
+      x:0,
+      pagination:{
+        start:1,
+        pageSize: 3,
+        total: 0
+      },
+      arr:[],
+      total:0,
+      formData:{
+        name:'',
+        status:''
+      },
+      gridData: [{
+            // componentRatio: "",  
+            // createTime: "",
+            // errorRunTimeStr: "",
+            // hostIp: "",
+            // id: 3,
+            // msg: "",
+            // name: "",
+            // normalRunTimeStr: "",
+            // port: "",
+            // status: 1,
+            // totolRunTime: "",
+            // updateTime: ""
+      }],
+        dialogTableVisible: false,
+
+      gridData3: [{
+            componentRatio: "100.0%",  //组件可用比
+            createTime: "2019-10-15 15:16:10",  
+            errorRunTimeStr: "0小时0分55秒",  //异常运行时长
+            hostIp: "192.168.1.203",  //组件IP
+            id: 1,
+            name: "人脸识别",   
+            normalRunTimeStr: "14天6小时0分12秒",  //正常运行时长
+            port: "80",  //能力端口
+            status: 0,   //组件状态
+            totolRunTime: "14天6小时0分12秒",  //运行时长
+            updateTime: "2019-10-20 21:58:13"  //更新时间
+        }],
+        dialogTableVisible3: false,
+
       activeName: "first",
       currentPage: 1, //初始页
       pagesize: 10, //每页的数据
@@ -249,6 +374,8 @@ export default {
       percentage1: 35,
       compStatus:'',
       compName:"",
+      selectAbility:"",  //选择能力
+      abilityStatus:"",  //能力状态
       customColor: "#409eff",
       customColors: [
         { color: "#f56c6c", percentage: 65 },
@@ -293,7 +420,11 @@ export default {
         region: "",
         hostIp: ""
       },
+      formInline2:{
+        name:"",
+        id:"",
 
+      },
 
       addForm: {
         name: "",
@@ -308,10 +439,7 @@ export default {
       dialogAddgsVisible: false,
       dialogEditgsVisible: false,
       dialogEditgsVisible1: false,
-      options: [
-       
-    
-      ],
+      options: [],
       value: "",
       optionss: [
         {
@@ -323,6 +451,17 @@ export default {
           value:1
         },
       ],
+        option2: [
+        {
+          name:"正常3",
+          value:0
+        },
+        {
+          name:"告警3",
+          value:1
+        },
+      ],
+
       values: "",
       hostDetail: {},
       rules: {
@@ -375,17 +514,106 @@ export default {
     };
   },
   methods: {
-    //调取获取主机信息列表(主机监控)接口
+    //画圆环
+    getCircal(ele,value) {
+    // console.log(ele,value,'12345678-*********')
+    let x = value; // 动态变动的进度值
+    let ctx = ele.getContext('2d');
+    // 最外层圆环
+    ctx.beginPath();
+    ctx.lineWidth = 5; 
+    ctx.strokeStyle = '#F0F8FF';
+    ctx.arc(50, 50, 40, 0, 2 * Math.PI);
+    ctx.restore();
+    ctx.stroke();
+    // 内层浅蓝色圆环
+    ctx.beginPath();
+    ctx.lineWidth = 5; 
+    ctx.strokeStyle = '#87CEFA';
+    ctx.arc(50, 50, 40, 0, 2 * Math.PI);
+    ctx.restore();
+    ctx.stroke();
+    // 深色进度条圆环
+    ctx.beginPath();
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = '#1E90FF';
+    ctx.arc(50, 50, 50, -90 * Math.PI / 180, (x * 3.6 - 90) * Math.PI / 180);
+    ctx.stroke();
+    // 中心进度文字
+    ctx.font = '20px Arial';
+    ctx.fillStyle = '#f30';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${x.toFixed(2)}%`, 50, 50);
+    },
+    //选项卡三的刷新
+    getRefresh() {
+      console.log('1234556')
+      this.$axios.post('/oms-basic/webappInfo!list.json').then(res =>{
+        this.tableData3  = [];
+        setTimeout(() => {
+        this.tableData3 = res.data.list;
+        }, 300);
+        console.log(this.tableData3,'123456')
+      }).catch(error =>{
+        console.log(error)
+      })
+    },
+
+    //选项二的详情
+    getDetail2(index, row) {
+      let  mydata = {
+        name:row.name
+      }
+      console.log(mydata,'mydata')
+      var param = this.$qs.stringify(mydata)
+      this.dialogTableVisible = true;
+      this.$axios.post('/oms-basic/softWareInfo!getSoftWareInfoListByName.json',param
+      ).then(res => {
+        console.log(res,'res')
+             this.gridData = res.data.list;
+             console.log(this.gridData)
+      }).catch(error => {
+
+      })
+    },
+    //选项卡三的详情
+    getDetail3(index,row) {
+      this.dialogTableVisible3 = true;
+      let mydata3 = {
+        name:row.name
+      }
+      var param3 = this.$qs.stringify(mydata3);
+      this.$axios.post('/oms-basic/webappInfo!get.json',param3).then(res => {
+        this.gridData3 = res.data.list;
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    //选项卡三的搜索
+    //obj 就是输入框带的值,发请求带的参数。
+    getSearch3(obj) {
+      this.$axios.post('/oms-basic/webappInfo!list.json',this.$qs.stringify(obj)).then(
+        res => {
+          this.tableData3 = res.data.list;
+          console.log(res,'res')
+        }).catch(error => {
+          console.log(error)
+        })
+    },
+    //调取获取主机信息列表(主机监控)table表格接口
     getMessage() {
       this.$axios
         .post("/oms-basic/hardWareInfo!list.json", {})
         .then(res => {
           this.tableData = [].concat(res.data.list);
+          this.total = res.data.count;
         })
         .catch(error => {
           console.log(error);
         });
     },
+    //选项卡二的搜索功能
      onSubmit2() {
        let formData={};
       if (this.compName) {
@@ -404,41 +632,57 @@ export default {
           console.log(res, "search");
         })
         .catch(err => {});
-      //
+        console.log(err)
     },
-    //调取(主机监控)搜索接口
+    //选项卡三的搜索功能
+    onSubmit3() {
+      let {name,status} = this.formData;  //解构赋值 formData里面有两个键
+      if(!(name || status ))return;
+      let formData = {};
+      name && (formData.name = name);  //name 的值赋值给formData.name
+      status && (formData.status = status);  //status的值值赋值给formData.status
+      // this.pagination = {
+      //   start:1,  //做分页的时候:传当前页与一页有几条数据
+      //   pageSize: 3,
+      //   total: 0
+      // };
+      // Object.keys(this.pagination).forEach(item=>formData[item]=this.pagination[item]);
+      console.log("formdata",formData)
+      this.getSearch3(formData);
+    },
+    //调取选项卡三的下拉选择能力接口
+    select() {
+      this.$axios.post('/oms-basic/webappInfo!getWebappInfoList.json').then(res =>{
+        // console.log(res.data.list,'123456')
+        this.arr = res.data.list;
+        // console.log(this.arr,'99999999999')        
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    //调取选项卡一(主机监控)搜索接口
     onSubmit() {
-      if (!(this.formInline2.name || this.formInline.id)) {
+      if (!(this.formInline.hostName || this.formInline.hostIp)) {
         return;
       }
       let formData = {};
-      if (this.formInline.name) {
-        formData.hostname = this.formInline.hostname;
+      if (this.formInline.hostName) {
+        formData.hostName = this.formInline.hostName;
       }
-      if (this.formInline.id) {
-        formData.hostIp = this.formInline.id;
+      if (this.formInline.hostIp) {
+        formData.hostIp = this.formInline.hostIp;
       }
       this.$axios
         .post("/oms-basic/hardWareInfo!list.json", this.$qs.stringify(formData))
         .then(res => {
-          this.tableData2 = res.data.list;
+          this.tableData = res.data.list;
         })
         .catch(error => {
           console.log(error);
         });
     },
-    //调取组件监控搜索接口
-
-      // if(!(this.value || this.values )) {return}
-      //   let formData2 = {};
-      //   if(this.value) {
-      //     this.tableData2.name = this.options.value;
-      //   }
-      //   if(this.values) {
-      //     this.tableData2.id = this.optionss.values;
-      //   }
+    //
       getcomponentName() {
-        console.log('----999')
         this.$axios.post('/oms-basic/softWareInfo!list.json').then(res => {
           this.options = res.data.list;
           console.log(this.options,'this.options')
@@ -446,8 +690,7 @@ export default {
           console.log(error)
         })
       },
-
-    //获取组件信息列表(组件监控)接口
+    //获取组件信息列表(组件监控)table表格接口
     getComponent() {
       this.$axios
         .post("/oms-basic/softWareInfo!list.json", {})
@@ -516,6 +759,17 @@ export default {
       this.currentPage = currentPage;
       // console.log(this.currentPage)  //点击第几页
     },
+    // 初始页currentPage、初始每页数据数pagesize和数据data
+    handleSizeChange2: function(size) {
+      this.pagesize = size;
+      // console.log(this.pagesize); //每页下拉显示数据
+    },
+    handleCurrentChange2: function(currentPage) {
+      this.currentPage = currentPage;
+      // console.log(this.currentPage)  //点击第几页
+    },
+
+
     deleteRow1(index) {
       this.tableData.forEach((item, index) => {});
 
@@ -614,17 +868,24 @@ export default {
       };
       app.setOption(option);
     },
+    //点击详情
     editgsForm(hostIp) {
       this.queryHotDetail({hostIp});
-      
+      this.getCircal(this.$refs.canvas1,this.canvas1Value);  //画圆环
+      this.getCircal(this.$refs.canvas2,this.canvas2Value);  //画圆环
+      console.log(this.$refs.canvas1,'this.$refs.canvas1,')
     }
   },
   mounted() {
+      // this.$nextTick(()=>{
+      // console.log(this.$refs.canvas1,'this.$refs.canvas1')
+      // })
     this.getMessage(); //调取table表格数据接口
     // this.getSearch();  //调取搜索接口
     this.getComponent(); //获取组件信息列表table表格(组件监控)接口
     this.getAbility(); //调取能力监控table表格接口
     this.getcomponentName();
+    this.select();  //调取下拉框接口
   }
 };
 </script>
