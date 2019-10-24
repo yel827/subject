@@ -7,38 +7,53 @@
             <el-form :inline="true" :model="formData" class="demo-form-inline">
               <!-- 告警源 -->
               <!-- <span class="demonstration">告警源</span> -->
-              <el-form-item label="告警策略" class="right">
-                <el-select></el-select>
+              <el-form-item label="告警源" class="right">
+                <el-select v-model="value1">
+                  <el-option
+                    v-for="item in optionss"
+                    :key="item.label"
+                    :label="item.label"
+                    :value="item.label"
+                  ></el-option>
+                </el-select>
               </el-form-item>
               <!-- 告警类型 -->
-              <!-- <span class="demonstration">告警类型</span> -->
-              <el-form-item label="告警策略" class="right">
-                <el-select></el-select>
+
+              <span class="demonstration">告警类型</span>
+              <el-select v-model="value" placeholder="请选择" class="right">
+                <el-option
+                  v-for="item in options"
+                  :key="item.label"
+                  :label="item.label"
+                  :value="item.label"
+                ></el-option>
+              </el-select>
+
+              <el-form-item label="监控项" class="right">
+                <el-input v-model="formInline.name" placeholder="监控项"></el-input>
               </el-form-item>
-              <!-- 告警策略 -->
-              <el-form-item label="告警策略" class="right">
-                <el-select></el-select>
-              </el-form-item>
-              <!-- 监控项 -->
-              <el-form-item label="告警策略" class="right">
-                <el-input placeholder="来源IP" style="width:170px;" class="tetMy"></el-input>
-              </el-form-item>
+
               <!-- 时间选择 -->
               <!-- <span class="demonstration">时间选择</span> -->
-              <el-date-picker
-                type="daterange"
-                align="right"
-                class="right MyData"
-                unlink-panels
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                :picker-options="pickerOptions"
-              ></el-date-picker>
+              <span class="ssss">
+                <span class="demonstration">时间选择</span>
+                <el-date-picker
+                  v-model="value2"
+                  type="daterange"
+                  align="right"
+                  class="right"
+                  unlink-panels
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  :picker-options="pickerOptions"
+                ></el-date-picker>
+              </span>
               <!-- 搜索 导出当前按钮 -->
               <el-form-item>
-                <el-button type="primary" @click="onSubmit" class="right">搜索</el-button>
+                <el-button type="primary" @click="onSubmit_" class="right">搜索</el-button>
                 <el-button type="primary" class="right" @click="exportCurrent">发 送</el-button>
+                
               </el-form-item>
             </el-form>
           </div>
@@ -46,21 +61,36 @@
             :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)"
             style="width: 100%;"
             class="tabP"
+            @selection-change="changFun"
           >
-            <el-table-column type="selection" width="65"></el-table-column>
+            <el-table-column type="selection" width="65" @selection-change="changFun"></el-table-column>
             <el-table-column prop="id" label="告警ID" width="180"></el-table-column>
-            <el-table-column prop="source" label="告警项" width="180"></el-table-column>
+            <el-table-column prop="source" label="告警源" width="180"></el-table-column>
             <el-table-column prop="monitorItem" label="监控项"></el-table-column>
             <el-table-column prop="createTime" label="告警时间"></el-table-column>
-            <el-table-column prop="strategy" label="告警策略"></el-table-column>
+            <el-table-column prop="warnStatus" label="告警状态"></el-table-column>
             <el-table-column prop="msg" label="告警信息"></el-table-column>
 
             <el-table-column label="操作">
               <template slot-scope="scope">
-                <el-radio-group v-model="radio">
-                  <el-radio :label="scope.$index">已处理</el-radio>
-                  <el-radio :label="scope.$index+'12'">忽略</el-radio>
-                </el-radio-group>
+                <div>
+                  <i
+                    class="el-icon-success"
+                    :class='scope.row.status?"dealed":"undealed"'
+                    @click="on_(scope.row,scope.$index)"
+                    style="font-size:18px;"
+                  >
+                    <span style="font-size:14px;">已处理</span>
+                  </i>
+                  <i
+                    class="el-icon-success"
+                    :class='scope.row.status?"undealed":"dealed"'
+                    @click="off_(scope.row,scope.$index)"
+                    style="font-size:18px;"
+                  >
+                    <span style="font-size:14px;">忽略</span>
+                  </i>
+                </div>
               </template>
             </el-table-column>
           </el-table>
@@ -69,7 +99,7 @@
               @size-change="handleSizeChange"
               @current-change="handleCurrentChange"
               :current-page.sync="currentPage1"
-              :page-size="100"
+              :page-size="10"
               layout="total, prev, pager, next"
               :total="total"
             ></el-pagination>
@@ -85,14 +115,18 @@
                 <el-button type="primary" @click="doFilter" class="right">搜索</el-button>
                 <el-button type="primary" plain @click="dialogVisible = true" class="right">创建联系人</el-button>
                 <!-- 0 -->
-                <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
+                <el-dialog title="提示" :visible.sync="dialogVisible" class="onace" width="30%">
                   <el-row>
-                    租户名称
+                    联系人名称
                     <el-input v-model="productName" style="width: 70%;margin: 10px 0 10px 0"></el-input>
                   </el-row>
                   <el-row>
-                    授权能力
+                    联系人邮箱
                     <el-input v-model="value" style="width: 70%;margin: 10px 0 10px 0"></el-input>
+                  </el-row>
+                  <el-row>
+                    联系人电话
+                    <el-input v-model="values" style="width: 70%;margin: 10px 0 10px 0"></el-input>
                   </el-row>
                   <div slot="footer" class="dialog-footer">
                     <el-button @click="dialogVisible = false">取 消</el-button>
@@ -123,7 +157,7 @@
                 </el-button>
                 <!-- 编辑弹窗 dialog-->
                 <el-dialog
-                  class="headers"
+                  class="headers onace"
                   :title="title"
                   :visible.sync="dialogEditgsVisible"
                   width="30%"
@@ -131,25 +165,16 @@
                   @close="closeDialogVisible"
                 >
                   <el-form :model="editForm" :rules="rules" ref="editForm">
-                    <el-form-item label="联系人ID" class="add" :label-width="formLabelWidth">
-                      <el-input readonly v-model="editForm.id" autocomplete="off"></el-input>
+                    <el-form-item label="联系人姓名" :label-width="formLabelWidth">
+                      <el-input readonly v-model="editForm.name" autocomplete="off"></el-input>
                     </el-form-item>
-                    <el-form-item label="联系人姓名" class="add" :label-width="formLabelWidth">
-                      <el-input v-model="editForm.name" autocomplete="off"></el-input>
-                    </el-form-item>
-                    <el-form-item label="联系人电话" class="add" :label-width="formLabelWidth">
+                    <el-form-item label="联系手机号" :label-width="formLabelWidth">
                       <el-input v-model="editForm.phone" autocomplete="off"></el-input>
                     </el-form-item>
-                    <el-form-item label="联系人邮箱" class="add" :label-width="formLabelWidth">
+                    <el-form-item label="联系人邮箱" :label-width="formLabelWidth">
                       <el-input v-model="editForm.email" autocomplete="off"></el-input>
                     </el-form-item>
-                    <el-form-item label="微信昵称" class="add" :label-width="formLabelWidth">
-                      <el-input v-model="editForm.wechatName" autocomplete="off"></el-input>
-                    </el-form-item>
-                    <el-form-item label="告警策略" class="add" :label-width="formLabelWidth">
-                      <el-input v-model="editForm.createTime" autocomplete="off"></el-input>
-                    </el-form-item>
-                    <el-form-item label="告警策略" class="add" :label-width="formLabelWidth">
+                    <el-form-item label="告警策略" :label-width="formLabelWidth">
                       <el-input v-model="editForm.msg" autocomplete="off"></el-input>
                     </el-form-item>
                   </el-form>
@@ -236,6 +261,7 @@ export default {
       },
       value1: "",
       value2: "",
+      value3: "",
       form: {
         name: "",
         abilityId: [],
@@ -270,50 +296,47 @@ export default {
       tableDataValue: "",
       options: [
         {
-          value: "选项1",
-          label: "黄金糕"
+          value: "选项1", //value可以不写
+          label: "忽略" //值
         },
         {
           value: "选项2",
-          label: "双皮奶"
+          label: "已处理"
+        }
+      ],
+      optionss: [
+        {
+          value: "选项1",
+          label: "主机"
+        },
+        {
+          value: "选项2",
+          label: "组件"
         },
         {
           value: "选项3",
-          label: "蚵仔煎"
+          label: "服务"
+        }
+      ],
+      optionsss: [
+        {
+          value: "选项1",
+          label: "处理"
         },
         {
-          value: "选项4",
-          label: "龙须面"
+          value: "选项2",
+          label: "已恢复"
         },
         {
-          value: "选项5",
-          label: "北京烤鸭"
+          value: "选项3",
+          label: ""
         }
       ],
       value: "",
-      optionss: [
-        {
-          values: "选项1",
-          labels: "黄金糕"
-        },
-        {
-          values: "选项2",
-          labels: "双皮奶"
-        },
-        {
-          values: "选项3",
-          labels: "蚵仔煎"
-        },
-        {
-          values: "选项4",
-          labels: "龙须面"
-        },
-        {
-          values: "选项5",
-          labels: "北京烤鸭"
-        }
-      ],
       values: "",
+
+      value2: "",
+      value3: "",
 
       rules: {
         name: [
@@ -333,6 +356,7 @@ export default {
         console.log(res, "告警列表");
         this.tableData = res.data.list;
         this.total = res.data.count;
+        this.tableData.warnStatus = '已处理'
       });
     },
     //数据展示(联系人列表)
@@ -342,7 +366,69 @@ export default {
         this.tableDatas = res.data.list;
       });
     },
-    //搜索
+    // 告警搜索
+    dateTransfer_(date) {
+      var y = date.getFullYear();
+      var m = date.getMonth() + 1;
+      m = m < 10 ? "0" + m : m;
+      var d = date.getDate();
+      d = d < 10 ? "0" + d : d;
+      var h = date.getHours();
+      var minute = date.getMinutes();
+      minute = minute < 10 ? "0" + minute : minute;
+      return y + "-" + m + "-" + d + " " + "00:00:00";
+    },
+    onSubmit_() {
+      if (
+        !(this.value || this.formInline.name || this.value1 || this.value2)
+      ) {
+        return;
+      }
+      var formData = {};
+      if (this.value1) {
+        formData.monitorItem = this.value1;
+      }
+      if (this.value) {
+        formData.warnStatus = this.value;
+      }
+      if (this.formInline.name) {
+        formData.name = this.formInline.name;
+      }
+      if (this.value2 != "" && this.value2 != undefined) {
+        formData.createTime = this.dateTransfer_(this.value2[0]);
+        formData.createTime = this.dateTransfer_(this.value2[1]);
+      }
+      console.log(formData, "传递的值");
+      this.$axios
+        .post(
+          "/oms-basic/warnInfoRelate!list.json",
+          this.$qs.stringify(formData)
+        )
+        .then(res => {
+          this.tableData = res.data.list;
+          console.log(this.tableData, "sou suo de jie huo");
+          console.log(res, "search");
+        })
+        .catch(err => {});
+      //
+    },
+    viewdetail(index, row) {
+      console.log(index, "index");
+      this.dialogDetailsVisible = true;
+      this.detailForm = row;
+    },
+    //////
+    currentChangePage(list) {
+      let from = (this.currentPage - 1) * this.pageSize;
+      let to = this.currentPage * this.pageSize;
+
+      for (; from < to; from++) {
+        if (list[from]) {
+          this.tableData.push(list[from]);
+        }
+      }
+    },
+    //联系人搜索
     doFilter() {
       // if (this.tableDataName == "" && this.tableDataValue == "") {
       //   this.$message.warning("查询条件不能为空！");
@@ -432,7 +518,57 @@ export default {
 
       this.dialogEditgsVisible1 = false;
     },
+    onSubmit() {
+      if (
+        !(
+          this.formInline.level ||
+          this.formInline.name ||
+          this.formInline.same ||
+          this.value2 ||
+          this.value ||
+          this.values
+        )
+      ) {
+        return;
+      }
+      var formData = {};
+      if (this.formInline.level) {
+        formData.level = this.formInline.level;
+      }
+      if (this.formInline.name) {
+        formData.source = this.formInline.name;
+      }
+      if (this.formInline.same) {
+        formData.tenantName = this.formInline.same;
+      }
+      console.log(this.value2, "this.value2");
 
+      if (this.value2 != "" && this.value2 != undefined) {
+        formData.startTime = this.dateTransfer(this.value2[0]);
+        formData.endTime = this.dateTransfer(this.value2[1]);
+      }
+      if (this.value) {
+        formData.level = this.value;
+      }
+      console.log(formData, "传递的值");
+      this.$axios
+        .post(
+          "/oms-basic/warnInfoRelate!list.json",
+          this.$qs.stringify(formData)
+        )
+        .then(res => {
+          this.tableData = res.data.list;
+
+          console.log(res, "search");
+        })
+        .catch(err => {});
+      //
+    },
+    viewdetail(index, row) {
+      console.log(index, "index");
+      this.dialogDetailsVisible = true;
+      this.detailForm = row;
+    },
     /**
      *
      * @param
@@ -459,7 +595,7 @@ export default {
     },
     saveEditForm() {
       var that = this;
-      var param = new URLSearchParams();
+      let param = new URLSearchParams();
       param.append("id", this.editForm.id);
       param.append("name", this.editForm.name);
       param.append("email", this.editForm.email);
@@ -468,7 +604,7 @@ export default {
       param.append("wechatName", this.editForm.wechatName);
       param.append("msg", this.editForm.msg);
       console.log(this.form.abilityId);
-      var data = {
+      let parm = {
         id: this.editForm.id,
         name: this.editForm.name,
         email: this.editForm.email,
@@ -477,27 +613,47 @@ export default {
         wechatName: this.editForm.wechatName,
         msg: this.editForm.msg
       };
-      // var header={
-      //   headers:{
-      //     "Content-Type":"application/x-www-form-urlencoded"
-      //   }
-      // }
+      console.log(parm);
       this.$axios
-        .post("/oms-basic/emergencyContact!save.json", data)
-        .then(function(response) {
-          console.log(response, "111111");
-          if (response.data.code == 10000) {
+        .post("/oms-basic/emergencyContact!save.json", param)
+        .then(res => {
+          console.log(res, "res");
+          if (res.data.code == 10000) {
             that.dialogEditgsVisible = false;
           }
         })
-        .catch(function(error) {
-          console.log(error);
+        .catch(error => {
+          console.log("error");
         });
+      // this.$axios({
+      //   url: "/oms-basic/emergencyContact!save.json",
+      //   method: "POST",
+      //   data: parm,
+      //   headers: "application/json"
+      // })
+      //   .then(res => {
+      //     console.log(res, "111111");
 
+      //     if (res.data.code == 10000) {
+      //       that.dialogEditgsVisible = false;
+      //     }
+      //   })
+      //   .catch(error => {
+      //     console.log("error");
+      //   });
       this.$axios.post("/oms-basic/emergencyContact!list.json").then(res => {
         console.log(res.data.list, "联系人列表");
         this.tableDatas = res.data.list;
       });
+      // this.$axios
+      //   .post("/oms-basic/emergencyContact!save.json",bj)
+      //   .then(function(response) {
+      //     console.log(response, "111111");
+      //
+      //   })
+      // .catch(function(error) {
+      //   console.log(error);
+      // });
     },
     //点击删除是触发函数
     open(index) {
@@ -557,7 +713,8 @@ export default {
 
       var params1 = {
         name: that.productName,
-        email: that.value
+        email: that.value,
+        phone:that.values
       };
       that.$axios
         .post(
@@ -585,6 +742,46 @@ export default {
         .catch(error => {
           console.log(error);
         });
+    },
+    //已忽略的接口
+    on_(obj, i) {
+      console.log(obj)
+      var intMyData1 = {
+        id: obj.id,
+        strategy: Number(obj.status)
+      };
+      if(obj.status==1){
+        return false;
+      }
+      this.$axios
+        .post("/oms-basic/warnInfoRelate!updateStatusById.json", this.$qs.stringify(intMyData1))
+        .then(res => {
+          console.log(res, "忽略1");
+          this.tableData[i].warnStatus = "已处理"
+          this.tableData[i].status=!obj.status;
+        });
+    },
+    off_(obj, i) {
+      console.log(obj)
+      var intMyData2 = {
+        id: obj.id,
+        strategy: Number(obj.status)
+      };
+      if(obj.status==0){
+        return false;
+      }
+      console.log(intMyData2, "sss");
+      this.$axios
+        .post("/oms-basic/warnInfoRelate!updateStatusById.json", this.$qs.stringify(intMyData2))
+        .then(res => {
+          console.log(res, "忽略2");
+          this.tableData[i].warnStatus = "忽略"
+          this.tableData[i].status=!obj.status;
+        });
+    },
+    changFun(val){
+      this.multipleSelection = val
+      console.log(this.multipleSelection,"当行数据")
     }
   },
   mounted() {
@@ -651,6 +848,18 @@ export default {
   left: 37%;
   top: 915px;
 }
+
+.onace {
+  /deep/.el-form-item__content {
+    display: flex;
+    flex-direction: row;
+    /deep/.el-input__inner {
+      width: 440px;
+      float: right;
+    }
+  }
+}
+
 .icon_tu {
   display: inline-block;
   position: fixed;
@@ -751,5 +960,16 @@ export default {
   /deep/ .el-range-input {
     width: 400px;
   }
+}
+.ssss {
+  /deep/.el-input__inner {
+    width: 400px;
+  }
+}
+.dealed{
+  color: #3584f3;
+}
+.undealed{
+  color: #ccc;
 }
 </style>

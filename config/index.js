@@ -26,7 +26,7 @@ module.exports = {
         // pathRewrite: {
         //   '^/oms-basic': '' // 需要rewrite的地址
         // }
-      }
+      },
     },
 
     // Various Dev Server settings
